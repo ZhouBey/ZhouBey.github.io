@@ -94,31 +94,24 @@ override fun onCreate() {
     sp = getSharedPreferences(Constant.SP_PERSONAL_DATA, Context.MODE_PRIVATE)
 }
 </code></pre><p>然而这并不是一种好的习惯。除非你十分确保 sp 在调用之前初始化，否则将会抛出异常，没有初始化之前不能使用，所有kotlin的空安全也要小心使用，不是说一定不会报异常，小心翻车！</p>
-<p>##2、data class<br>这是bean类，开发安卓免不了要跟服务端对接接口，生成bean类，这个类的作用就是为了存储数据，比较简单，所以写法也比较简单，没有特殊业务的话，其实就是一些getter和setter方法，如果属性比较多，写起来就比较繁琐。<br>kotlin中用data关键字定义了这个类，方便之处在你只用写属性就行。除此之外，如果你只是想改变某个属性的值，还可以用copy:</p>
+<h2 id="2、data-class"><a href="#2、data-class" class="headerlink" title="2、data class"></a>2、data class</h2><p>这是bean类，开发安卓免不了要跟服务端对接接口，生成bean类，这个类的作用就是为了存储数据，比较简单，所以写法也比较简单，没有特殊业务的话，其实就是一些getter和setter方法，如果属性比较多，写起来就比较繁琐。<br>kotlin中用data关键字定义了这个类，方便之处在你只用写属性就行。除此之外，如果你只是想改变某个属性的值，还可以用copy:</p>
 <pre><code>val zpy = User(name = &quot;zpy&quot;, age = 24)
 val youngZpy = jack.copy(age = 18)
 </code></pre><p>有个缺点是不支持GsonFormat自动生成代码。</p>
-<p>##3、支持lambda表达式，代码量大大减少</p>
-<p>###（1）view的点击事件</p>
-<pre><code>view.setOnClickListener({ toast(&quot;Click&quot;) })  
-</code></pre><p>###（2）list的遍历</p>
-<pre><code>list.forEach { }
+<h2 id="3、支持lambda表达式，代码量大大减少"><a href="#3、支持lambda表达式，代码量大大减少" class="headerlink" title="3、支持lambda表达式，代码量大大减少"></a>3、支持lambda表达式，代码量大大减少</h2><h3 id="（1）view的点击事件"><a href="#（1）view的点击事件" class="headerlink" title="（1）view的点击事件"></a>（1）view的点击事件</h3><pre><code>view.setOnClickListener({ toast(&quot;Click&quot;) })  
+</code></pre><h3 id="（2）list的遍历"><a href="#（2）list的遍历" class="headerlink" title="（2）list的遍历"></a>（2）list的遍历</h3><pre><code>list.forEach { }
 
 list.forEachWithIndex { i, item -&gt;}
-</code></pre><p>#二、anko库</p>
-<p>##1、使用doAsync-uiThread实现handler</p>
-<pre><code>doAsync {
+</code></pre><h1 id="二、anko库"><a href="#二、anko库" class="headerlink" title="二、anko库"></a>二、anko库</h1><h2 id="1、使用doAsync-uiThread实现handler"><a href="#1、使用doAsync-uiThread实现handler" class="headerlink" title="1、使用doAsync-uiThread实现handler"></a>1、使用doAsync-uiThread实现handler</h2><pre><code>doAsync {
           Log.e(&quot;aaa&quot;, Thread.currentThread().name)
           Thread.sleep(10000)
           uiThread {
             Log.e(&quot;bbb&quot;, Thread.currentThread().name)
           }
        }
-</code></pre><p>##2、intent意图跳转activity</p>
-<pre><code>startActivity&lt;MainActivity&gt;()
+</code></pre><h2 id="2、intent意图跳转activity"><a href="#2、intent意图跳转activity" class="headerlink" title="2、intent意图跳转activity"></a>2、intent意图跳转activity</h2><pre><code>startActivity&lt;MainActivity&gt;()
 startActivity&lt;MainActivity&gt;(&quot;aa&quot; to 1,&quot;bb&quot; to 2)
-</code></pre><p>##3、通过代码布局替代xml</p>
-<pre><code>verticalLayout {
+</code></pre><h2 id="3、通过代码布局替代xml"><a href="#3、通过代码布局替代xml" class="headerlink" title="3、通过代码布局替代xml"></a>3、通过代码布局替代xml</h2><pre><code>verticalLayout {
     val name = editText()
     button(&quot;Say Hello&quot;) {
     onClick { toast(&quot;Hello, ${name.text}!&quot;) }
@@ -128,7 +121,7 @@ startActivity&lt;MainActivity&gt;(&quot;aa&quot; to 1,&quot;bb&quot; to 2)
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/24/让安卓开发更轻松：kotlin-for-android/" data-id="cj5pipyze0001ncfyqn5fv7h4" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/24/让安卓开发更轻松：kotlin-for-android/" data-id="cj5pirzvx0001ocfy2818tgkn" class="article-share-link">Share</a>
       
       
     </footer>
@@ -173,7 +166,7 @@ startActivity&lt;MainActivity&gt;(&quot;aa&quot; to 1,&quot;bb&quot; to 2)
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/18/hello-world/" data-id="cj5pipyza0000ncfy6lndchhf" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/18/hello-world/" data-id="cj5pirzvs0000ocfyiydgxkhj" class="article-share-link">Share</a>
       
       
     </footer>
