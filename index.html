@@ -64,116 +64,6 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-android-gradle打包配置" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/07/30/android-gradle打包配置/" class="article-date">
-  <time datetime="2017-07-30T12:36:37.000Z" itemprop="datePublished">2017-07-30</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/30/android-gradle打包配置/">android gradle打包配置</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Android 构建系统编译应用资源和源代码，然后将它们打包成可供开发者测试、部署、签署和分发的 APK。Android Studio 使用 Gradle 这一高级构建工具包来自动化执行和管理构建流程，同时也可以进行灵活的自定义构建配置。<br>Gradle 和 Android 插件独立于 Android Studio 运行。这意味着，我们可以在 Android Studio 内、命令行工具构建 Android 应用。本文主要讲述怎么在 android studio 中配置gradle。</p>
-<h1 id="构建流程"><a href="#构建流程" class="headerlink" title="构建流程"></a>构建流程</h1><!--![alt text](https://developer.android.com/images/tools/studio/build-process_2x.png "典型 Android 应用模块的构建流程。")-->
-<h1 id="自定义配置"><a href="#自定义配置" class="headerlink" title="自定义配置"></a>自定义配置</h1><h2 id="替换清单文件中的占位符"><a href="#替换清单文件中的占位符" class="headerlink" title="替换清单文件中的占位符"></a>替换清单文件中的占位符</h2><p><strong>用途：可以配置第三方服务账号</strong></p>
-<p>比如我们要配置极光推送的APP_KEY</p>
-<pre><code>&lt;meta-data
-   android:name=&quot;JPUSH_APPKEY&quot;
-   android:value=&quot;${JPUSH_APPKEY}&quot; /&gt;
-</code></pre><p>在app.gradle里接收gradlew assemble命令输入的自定义参数的值</p>
-<pre><code>manifestPlaceholders = [
-            JPUSH_APPKEY: &quot;${JPUSH_APPKEY}&quot;
-    ]
-</code></pre><h2 id="在gradle里面设置变量"><a href="#在gradle里面设置变量" class="headerlink" title="在gradle里面设置变量"></a>在gradle里面设置变量</h2><p><strong>用途:可以配置测试环境、开发环境和线上环境变量</strong><br>比如http接口的请求路径url的Host分开发和线上，则可以在app.gradle里面这样设置：</p>
-<pre><code>def API_RELEASE_HOST = &quot;\&quot;https://api-release-host\&quot;&quot;
-def API_DEV_HOST = &quot;\&quot;https://api-dev-host\&quot;&quot;
-</code></pre><p>然后在buildTypes里进行字段的声明：</p>
-<pre><code>buildTypes {
-    release {
-         buildConfigField(&quot;String&quot;, &quot;API_HOST&quot;, &quot;${API_RELEASE_HOST}&quot;)
-    }
-    debug {
-        buildConfigField(&quot;String&quot;, &quot;API_HOST&quot;, &quot;${API_DEV_HOST}&quot;)
-    }
-}
-</code></pre><p>buildConfigField方法中第一个参数是变量类型，第二个是变量名，第三个是变量值。<br>这样BuildConfig类里面会自动生成一个字段：</p>
-<pre><code>public static final String API_HOST = &quot;https://api-release-host&quot;;
-</code></pre><p>这是一个默认值，直接用BuildConfig.API_HOST调用，当你生成开发包时，它的值就是<code>API_DEV_HOST</code>，当你生成正式包时，它的值就是<code>API_RELEASE_HOST</code>。再也不用在打包前去更改代码了。</p>
-<h2 id="配置签名信息"><a href="#配置签名信息" class="headerlink" title="配置签名信息"></a>配置签名信息</h2><p><strong>用途：打包签名时，直接读取签名信息和文件，简单方便，直接运行时也可以打入签名</strong><br>先在app.gradle的android节点下配置签名信息，如下：</p>
-<pre><code>android {
-    signingConfigs {
-        config {
-            keyAlias &apos;mxzapp&apos;
-            keyPassword &apos;msf2mS96OnoLSPO6&apos;
-            storeFile file(&apos;/Users/zpy/AndroidStudioProjects/mxz-app-android/mxzapp.jks&apos;)
-            storePassword &apos;msf2mS96OnoLSPO6&apos;
-        }
-     }
-}
-</code></pre><p>然后在buildType下引用：</p>
-<pre><code>buildTypes {
-    release {
-        signingConfig signingConfigs.config
-    }
-    debug {
-        signingConfig signingConfigs.config
-    }
-}
-</code></pre><h2 id="多渠道打包"><a href="#多渠道打包" class="headerlink" title="多渠道打包"></a>多渠道打包</h2><p><strong>用途:统计各个应用市场的app下载量和使用情况</strong><br>国内应用市场非常多，为了统计各个应用市场的app下载量和使用情况，我们需要多渠道的打包。</p>
-<ol>
-<li><p>配置AndroidManifest文件<br>以极光渠道为例：<br>参考前面的替换清单文件中的占位符</p>
-<p> <meta-data android:name="JIGUANG_CHANNEL" android:value="xiaomi"><br>如果不使用多渠道打包方法，那就需要我们手动一个一个去修改value中的值，xiaomi，360，qq，wandoujia等等。使用多渠道打包的方式，就需要把上面的value配置成下面的方式：</meta-data></p>
-<p> <meta-data android:name="JPUSH_CHANNEL" android:value="${JPUSH_CHANNEL_NAME}"><br>其中${JPUSH_CHANNEL_NAME}中的值就是你在gradle中自定义配置的值。</meta-data></p>
-</li>
-<li><p>在build.gradle设置productFlavors</p>
-<p> android{</p>
-<pre><code>productFlavors {
-    qh360 {}
-    xiaomi {}
-    pp {}
-    flyme {}
-    lenovo {}
-    huawei {}
-    baidu {}
-    vivo {}
-    yingyongbao {}
-    oppo {}
-
-}
-
-productFlavors.all {
-    flavor -&gt; flavor.manifestPlaceholders = [JPUSH_CHANNEL_NAME:             name]
-}
-</code></pre><p> }</p>
-</li>
-</ol>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/30/android-gradle打包配置/" data-id="cj5qvxt290000fhfyvs3ogqmg" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
     <article id="post-让安卓开发更轻松：kotlin-for-android" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/07/24/让安卓开发更轻松：kotlin-for-android/" class="article-date">
@@ -231,7 +121,7 @@ startActivity&lt;MainActivity&gt;(&quot;aa&quot; to 1,&quot;bb&quot; to 2)
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/24/让安卓开发更轻松：kotlin-for-android/" data-id="cj5qvxt2e0002fhfy56d487iy" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/24/让安卓开发更轻松：kotlin-for-android/" data-id="cj5qvz28d0002gsfymfzozjow" class="article-share-link">Share</a>
       
       
     </footer>
@@ -276,7 +166,7 @@ startActivity&lt;MainActivity&gt;(&quot;aa&quot; to 1,&quot;bb&quot; to 2)
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/18/hello-world/" data-id="cj5qvxt2c0001fhfy3lijw47m" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/18/hello-world/" data-id="cj5qvz28b0001gsfyuapgw2oa" class="article-share-link">Share</a>
       
       
     </footer>
@@ -314,10 +204,6 @@ startActivity&lt;MainActivity&gt;(&quot;aa&quot; to 1,&quot;bb&quot; to 2)
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
-        
-          <li>
-            <a href="/2017/07/30/android-gradle打包配置/">android gradle打包配置</a>
-          </li>
         
           <li>
             <a href="/2017/07/24/让安卓开发更轻松：kotlin-for-android/">让安卓开发更轻松：kotlin for android</a>
